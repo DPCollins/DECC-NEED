@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>DECC</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 	<link rel="stylesheet" href="{{url_for('static', filename='MarkerCluster.css') }}" /> -->
+<!-- 	<link rel="stylesheet"href="{{url_for('static', filename='MarkerCluster.Default.css') }}" /> -->
+<!-- 	<link rel="stylesheet"href="{{url_for('static', filename='shCoreEclipse.css') }}" /> -->
+<!-- 	<link rel="stylesheet"href="{{url_for('static', filename='slider.css') }}" /> -->
+	<link rel="stylesheet"href="{{url_for('static', filename='bootstrap.css') }}" />
+    <link rel="stylesheet"href="{{url_for('static', filename='l.geosearch.css') }}" />
+
+    <link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.css' rel='stylesheet' />
+
+<!-- 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" /> -->
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+
+	<style>
+		html, body {
+   		height: 100%;
+/*    		width: 100%; */
+		}
+		
+		body { 
+			margin-top: 0px;
+			margin-left: 0px;
+			margin-right: 0px;
+			margin-bottom:0px;
+			}
+		
+		#map {
+/* 			width: 1270px;			 */
+/* 			height: 600px; */
+			
+			width: 100%;
+			height: 100%;
+		}
+
+		.info {
+			padding: 6px 8px;
+			font: 12px/16px Arial, Helvetica, sans-serif;
+			width: 33%;
+			/* text-align: left; */
+			background: white;
+			background: rgba(255,255,255,0.8);
+			box-shadow: 0 0 15px rgba(0,0,0,0.2);
+			border-radius: 5px;
+		}
+		.info h4 {
+/* 			text-align: center; */
+			font-weight: bold;
+			font-size:16px;
+			margin: 0 0 5px;
+			color: #777;
+		}
+
+		.legend {
+			text-align: left;
+			line-height: 18px;
+			color: #555;
+		}
+		.legend i {
+			width: 18px;
+			height: 18px;
+			float: left;
+			margin-right: 8px;
+			opacity: 0.7;
+		}
+	    #tweet {
+
+    		position: fixed;
+			top: 10px;
+			left:50px;
+			z-index: 1050;
+
+		}
+		
+		/* 
+canvas { 
+			background: black;
+			opacity: 0.75 		
+				}
+ */
+
+		#sl1 {
+    		width: 50%;
+  				}
+  				
+   		.view {
+			padding: 8px 8px 8px;
+			font: 14px/16px Arial, Helvetica, sans-serif;
+			font: Impact;
+			color: rgb(255,255,255);
+			width: 100%;
+			/* text-align: left; */
+			line-height: 10px;
+/* 			background: rgba(255,255,255,0.8); */
+			background: rgba(82,82,82,0.65);
+			font-weight: bold;
+			box-shadow: 0 0 15px rgba(0,0,0,0.2);
+			border-radius: 5px;
+		}
+		.view h4 {
+			padding: 2px 2px;
+			font: Impact;
+/* 			font: Arial, Helvetica, sans-serif; */
+			font-weight: bold;
+			font-size:20px;
+			margin: 0 0 0px;
+			color: rgba(255,255,255,0.7);
+		}
+		
+	
+	  .leaflet-label {
+      background: white;
+      background: rgba(255,255,255,0.8);
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);      
+      border-radius: 2px;   
+      font: 14px/16px Arial, Helvetica, sans-serif;        
+      display: block;
+      padding: 3px 5px;
+      position: absolute;
+      white-space: nowrap;
+      margin-top: 37px;
+    }
+
+	
+		
+	</style>
+
+
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+	<script type="text/javascript" src="static/js/L.Graticule.js"></script>
+<!-- 	<script type="text/javascript" src="static/js/L.Graticule2.js"></script> -->
+	<script type="text/javascript" src="static/js/underscore.js"></script>
+
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+	<script type="text/javascript" src="static/data/Poly2.js"></script>
+	<script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.js'></script>
+	<script type="text/javascript" src="static/js/leaflet.active-layers.min.js"></script>
+	<script type="text/javascript" src="static/js/l.control.geosearch.js"></script>
+	<script type="text/javascript" src="static/js/l.geosearch.provider.openstreetmap.js"></script>
+
+	
+
+
+	<script type="text/javascript">
+
+	 
+function init(){
+
+
+	var map = L.mapbox.map('map', undefined, {
+    infoControl: true,
+    attributionControl: false,
+    gridControl: true,
+    maxZoom: 15,
+    minZoom: 10
+});
+	
+// 	var tilesUrl = 'static/data/bkup/1.0.0/DECC_House/{z}/{x}/{y}.png'
+	
+	
+	var Overlap = new L.tileLayer('http://dctilestream.herokuapp.com/v2/HBOVERLAP_LATEST/{z}/{x}/{y}.png');
+	var Claim = new L.tileLayer('https://dctilestream.herokuapp.com/v2/DECC_HBENTest/{z}/{x}/{y}.png').addTo(map);
+
+	var OneDeg = new L.tileLayer('https://dctilestream.herokuapp.com/v2/DECC_Deg/{z}/{x}/{y}.png');
+	
+	var CLASS = new L.tileLayer('http://dctilestream.herokuapp.com/v2/CLASSERR/{z}/{x}/{y}.png');
+	
+// 	var FourDeg = new L.tileLayer('https://dctilestream.herokuapp.com/v2/DECC4th/{z}/{x}/{y}.png');
+
+// 	var Claim = new L.tileLayer('https://dctilestream.herokuapp.com/v2/DECC_HBEN/{z}/{x}/{y}.png').addTo(map);
+
+
+// 	var tilesLayer = new L.mapbox.tileLayer('dpcollins.DECC');
+
+	
+	// Load interactivity data into the map with a gridLayer
+//     var gridLayer = L.mapbox.gridLayer(tilejson);
+
+// 	var gridLayer = L.mapbox.gridLayer('dpcollins.DECC');
+	OverlapG = L.mapbox.gridLayer('http://dctilestream.herokuapp.com/v2/HBOVERLAP_LATEST.json');
+    oneDegG = L.mapbox.gridLayer('http://dctilestream.herokuapp.com/v2/DECC_Deg.json');
+// 	FourDegG = L.mapbox.gridLayer('http://dctilestream.herokuapp.com/v2/DECC4th.json');
+// 	ClaimG = L.mapbox.gridLayer('http://dctilestream.herokuapp.com/v2/DECC_HBEN.json');
+	ClaimG = L.mapbox.gridLayer('http://dctilestream.herokuapp.com/v2/DECC_HBENTest.json');
+	CLASSG =  L.mapbox.gridLayer('http://dctilestream.herokuapp.com/v2/CLASSERR.json')
+	
+	var baseLayer = L.tileLayer('https://{s}.tiles.mapbox.com/v3/dpcollins.i209bh9n/{z}/{x}/{y}.png', {
+	
+		maxZoom: 14,
+		minZoom:7,
+		attribution: 'Map data &copy; 2014 OpenStreetMap contributors, OA data courtesy of ONS, DWP and DECC. Imagery &copy; 2014 Mapbox',
+
+	}).addTo(map)
+	
+	
+ layers = L.control.activeLayers( {
+  'Claimants': Claim,
+  'Target Weights': Overlap,
+  'Incorrect CWI Pred': CLASS,   
+
+  'One Degree': OneDeg
+//   'Four Degree': FourDeg 
+   }).addTo(map);
+	
+
+map.on('baselayerchange',function(e){
+d3.select('.map-tooltip').remove()
+console.log(e['name'])
+if (e['name'] == 'Target Weights') {GL = OverlapG}
+else if (e['name'] == 'One Degree') {GL = oneDegG}
+// else if (e['name'] == 'Four Degree') {GL = FourDegG}
+else if (e['name'] == 'Incorrect CWI Pred') {GL = CLASSG}
+else if (e['name'] == 'Claimants') {GL = ClaimG}
+// else if (e['name'] == 'ClaimTest') {GL = Claim2G}
+
+
+map.addLayer(GL)
+map.addControl(L.mapbox.gridControl(GL))
+
+});	
+// 	map.addLayer(gridLayer)
+// 	map.addControl(L.mapbox.gridControl(gridLayer))
+	
+	
+map.setView([51.500, -0.124],11);;
+	
+// Specify divisions
+// L.graticule({ 
+// 	
+// 	interval: .001,
+// 	onEachFeature: function(feature, layer) {
+//         val = feature.properties.name
+//         layer.bindLabel(val)
+//         .addTo(map);
+//       }
+//     }).addTo(map);
+
+new L.Control.GeoSearch({
+            provider: new L.GeoSearch.Provider.OpenStreetMap()
+        }).addTo(map);			
+
+
+
+
+
+}
+
+
+		        
+</script>
+
+</head>
+
+<body onload="init();">
+
+<div id="map">
+</div>
+</body>
+</html>
